@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>互動空間運算研究室 | Interactive Spatial Computing Laboratory</title>
+    <style>
+      /* 強制隱藏所有可能的編輯和預覽按鈕 */
+      [data-testid*="preview"],
+      [data-testid*="edit"],
+      [class*="preview"],
+      [class*="edit"],
+      [id*="preview"],
+      [id*="edit"],
+      button[title*="preview" i],
+      button[title*="edit" i],
+      button[aria-label*="preview" i],
+      button[aria-label*="edit" i],
+      .fixed.bottom-4.right-4,
+      .fixed.bottom-6.right-6,
+      .fixed.bottom-8.right-8,
+      .fixed.bottom-2.right-2,
+      .fixed.bottom-10.right-10,
+      div[style*="position: fixed"][style*="bottom"][style*="right"],
+      *[class*="made-with"],
+      *[class*="powered-by"],
+      *[class*="floating-button"],
+      *[class*="fab"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        left: -9999px !important;
+        top: -9999px !important;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-Bx73xhQY.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-B_DoUJYN.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
