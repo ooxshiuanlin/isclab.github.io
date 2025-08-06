@@ -210,8 +210,72 @@
             margin-top: 1rem;
         }
         
+        .content-block {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+        }
+        
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .block-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-small:hover {
+            background: #0056b3;
+        }
+        
+        .btn-small:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
         .btn-danger {
             background: #dc3545;
+        }
+        
+        .page-selector {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .page-selector select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
         }
         
         .btn-danger:hover {
@@ -306,9 +370,36 @@
         
         <div class="tab-content" id="content">
             <h3>內容管理</h3>
-            <p>此功能可以管理網站的各個內容區塊，包括隱藏、顯示、重新排序等操作。</p>
-            <div style="background: #fff3cd; padding: 1rem; border-radius: 5px; margin-top: 1rem;">
-                <strong>注意：</strong> 由於目前使用靜態HTML部署，內容管理功能需要重新部署才能生效。建議使用圖片管理和專案管理功能。
+            <p>管理網站各個頁面的內容區塊，可以隱藏、顯示、編輯或刪除整個區塊。</p>
+            
+            <div class="page-selector">
+                <h4>選擇要編輯的頁面</h4>
+                <select id="pageSelect" onchange="loadPageBlocks()">
+                    <option value="home">首頁</option>
+                    <option value="research">研究領域</option>
+                    <option value="contact">聯絡資訊</option>
+                </select>
+            </div>
+            
+            <div class="content-blocks" id="contentBlocks">
+                <!-- 內容區塊將在這裡動態生成 -->
+            </div>
+            
+            <div class="block-actions" style="margin-top: 2rem;">
+                <button class="btn" onclick="addNewBlock()">新增區塊</button>
+                <button class="btn" onclick="savePageChanges()">儲存變更</button>
+                <button class="btn btn-danger" onclick="resetPage()">重置頁面</button>
+            </div>
+            
+            <div style="background: #e3f2fd; padding: 1rem; border-radius: 5px; margin-top: 2rem;">
+                <strong>功能說明：</strong>
+                <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                    <li><strong>隱藏區塊</strong>：暫時隱藏區塊但保留內容</li>
+                    <li><strong>編輯區塊</strong>：修改區塊的標題和內容</li>
+                    <li><strong>刪除區塊</strong>：永久移除整個區塊</li>
+                    <li><strong>重新排序</strong>：拖拽區塊改變顯示順序</li>
+                    <li><strong>新增區塊</strong>：創建新的內容區塊</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -366,10 +457,181 @@
             }
         }
         
-        // 更新背景圖片
-        function updateHeroImage() {
-            alert('圖片更新功能需要重新部署網站才能生效。\n請聯絡技術人員協助更新。');
+        // 內容區塊管理功能
+        let currentPage = 'home';
+        let pageBlocks = {
+            home: [
+                { id: 'hero', title: '首頁橫幅', content: '互動空間運算研究室標題和介紹', visible: true, type: 'hero' },
+                { id: 'research-preview', title: '研究領域預覽', content: '主要研究領域的簡要介紹', visible: true, type: 'section' },
+                { id: 'contact-info', title: '聯絡資訊', content: '主持人和聯絡方式', visible: true, type: 'section' }
+            ],
+            research: [
+                { id: 'research-intro', title: '研究介紹', content: '研究領域總體介紹', visible: true, type: 'section' },
+                { id: 'research-grid', title: '四大研究方向', content: '互動建築設計、AR/VR、音像互動、AI輔助創作', visible: true, type: 'grid' },
+                { id: 'projects', title: '進行中專案', content: '當前研究專案列表', visible: true, type: 'projects' }
+            ],
+            contact: [
+                { id: 'contact-main', title: '主要聯絡資訊', content: '主持人、Email、電話、地址', visible: true, type: 'section' },
+                { id: 'location', title: '位置資訊', content: '實驗室位置和交通資訊', visible: true, type: 'section' }
+            ]
+        };
+        
+        // 載入頁面區塊
+        function loadPageBlocks() {
+            currentPage = document.getElementById('pageSelect').value;
+            const blocksContainer = document.getElementById('contentBlocks');
+            const blocks = pageBlocks[currentPage] || [];
+            
+            blocksContainer.innerHTML = '';
+            
+            blocks.forEach((block, index) => {
+                const blockElement = document.createElement('div');
+                blockElement.className = 'content-block';
+                blockElement.innerHTML = `
+                    <div class="block-header">
+                        <h4>${block.title}</h4>
+                        <div class="block-controls">
+                            <button class="btn-small ${block.visible ? 'btn-success' : 'btn-warning'}" 
+                                    onclick="toggleBlockVisibility(${index})">
+                                ${block.visible ? '顯示' : '隱藏'}
+                            </button>
+                            <button class="btn-small" onclick="editBlock(${index})">編輯</button>
+                            <button class="btn-small btn-danger" onclick="deleteBlock(${index})">刪除</button>
+                            <button class="btn-small" onclick="moveBlock(${index}, -1)" ${index === 0 ? 'disabled' : ''}>↑</button>
+                            <button class="btn-small" onclick="moveBlock(${index}, 1)" ${index === blocks.length - 1 ? 'disabled' : ''}>↓</button>
+                        </div>
+                    </div>
+                    <div class="block-content">
+                        <p><strong>類型：</strong>${block.type}</p>
+                        <p><strong>內容：</strong>${block.content}</p>
+                        <p><strong>狀態：</strong>${block.visible ? '顯示中' : '已隱藏'}</p>
+                    </div>
+                `;
+                blocksContainer.appendChild(blockElement);
+            });
         }
+        
+        // 切換區塊可見性
+        function toggleBlockVisibility(index) {
+            pageBlocks[currentPage][index].visible = !pageBlocks[currentPage][index].visible;
+            loadPageBlocks();
+            saveToLocalStorage();
+        }
+        
+        // 編輯區塊
+        function editBlock(index) {
+            const block = pageBlocks[currentPage][index];
+            const newTitle = prompt('編輯區塊標題:', block.title);
+            const newContent = prompt('編輯區塊內容:', block.content);
+            
+            if (newTitle !== null) block.title = newTitle;
+            if (newContent !== null) block.content = newContent;
+            
+            loadPageBlocks();
+            saveToLocalStorage();
+        }
+        
+        // 刪除區塊
+        function deleteBlock(index) {
+            if (confirm('確定要刪除這個區塊嗎？此操作無法復原。')) {
+                pageBlocks[currentPage].splice(index, 1);
+                loadPageBlocks();
+                saveToLocalStorage();
+            }
+        }
+        
+        // 移動區塊
+        function moveBlock(index, direction) {
+            const blocks = pageBlocks[currentPage];
+            const newIndex = index + direction;
+            
+            if (newIndex >= 0 && newIndex < blocks.length) {
+                [blocks[index], blocks[newIndex]] = [blocks[newIndex], blocks[index]];
+                loadPageBlocks();
+                saveToLocalStorage();
+            }
+        }
+        
+        // 新增區塊
+        function addNewBlock() {
+            const title = prompt('新區塊標題:');
+            const content = prompt('新區塊內容:');
+            const type = prompt('區塊類型 (section/grid/hero/projects):', 'section');
+            
+            if (title && content) {
+                const newBlock = {
+                    id: 'custom-' + Date.now(),
+                    title: title,
+                    content: content,
+                    visible: true,
+                    type: type || 'section'
+                };
+                
+                pageBlocks[currentPage].push(newBlock);
+                loadPageBlocks();
+                saveToLocalStorage();
+            }
+        }
+        
+        // 儲存變更
+        function savePageChanges() {
+            saveToLocalStorage();
+            alert('頁面變更已儲存！\n\n注意：由於使用靜態HTML部署，變更只會在本地生效。\n如需永久生效，請聯絡技術人員重新部署網站。');
+        }
+        
+        // 重置頁面
+        function resetPage() {
+            if (confirm('確定要重置此頁面的所有區塊嗎？這將恢復到預設狀態。')) {
+                // 重置為預設狀態
+                loadDefaultBlocks();
+                loadPageBlocks();
+                saveToLocalStorage();
+            }
+        }
+        
+        // 載入預設區塊
+        function loadDefaultBlocks() {
+            pageBlocks = {
+                home: [
+                    { id: 'hero', title: '首頁橫幅', content: '互動空間運算研究室標題和介紹', visible: true, type: 'hero' },
+                    { id: 'research-preview', title: '研究領域預覽', content: '主要研究領域的簡要介紹', visible: true, type: 'section' },
+                    { id: 'contact-info', title: '聯絡資訊', content: '主持人和聯絡方式', visible: true, type: 'section' }
+                ],
+                research: [
+                    { id: 'research-intro', title: '研究介紹', content: '研究領域總體介紹', visible: true, type: 'section' },
+                    { id: 'research-grid', title: '四大研究方向', content: '互動建築設計、AR/VR、音像互動、AI輔助創作', visible: true, type: 'grid' },
+                    { id: 'projects', title: '進行中專案', content: '當前研究專案列表', visible: true, type: 'projects' }
+                ],
+                contact: [
+                    { id: 'contact-main', title: '主要聯絡資訊', content: '主持人、Email、電話、地址', visible: true, type: 'section' },
+                    { id: 'location', title: '位置資訊', content: '實驗室位置和交通資訊', visible: true, type: 'section' }
+                ]
+            };
+        }
+        
+        // 儲存到本地儲存
+        function saveToLocalStorage() {
+            localStorage.setItem('isclab_page_blocks', JSON.stringify(pageBlocks));
+        }
+        
+        // 從本地儲存載入
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('isclab_page_blocks');
+            if (saved) {
+                pageBlocks = JSON.parse(saved);
+            }
+        }
+        
+        // 初始化內容管理
+        function initContentManagement() {
+            loadFromLocalStorage();
+            loadPageBlocks();
+        }
+        
+        // 頁面載入時初始化
+        window.addEventListener('load', function() {
+            initContentManagement();
+        });
         
         // 更新教授照片
         function updateProfessorImage() {
