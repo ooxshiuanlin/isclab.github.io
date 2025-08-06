@@ -450,17 +450,21 @@
     </div>
 
     <script>
-        // 登入驗證
-        function login() {
+        /        function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
             if (username === 'shiuanlin' && password === 'lin63619') {
+                // 教授登入 - 進入完整管理後台
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
-                loadProjects();
+            } else if (username === 'student' && password === '54160') {
+                // 學生登入 - 重定向到學生管理頁面
+                window.location.href = 'student-portal.html';
             } else {
-                document.getElementById('errorMessage').style.display = 'block';
+                alert('帳號或密碼錯誤');
+            }
+        }cument.getElementById('errorMessage').style.display = 'block';
             }
         }
         
