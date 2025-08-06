@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理後台 - 互動空間運算研究室</title>
+    <link rel="icon" type="image/x-icon" href="/isclab.github.io/favicon.ico" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1976D2;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #1976D2;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1976D2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .login-btn:hover {
+            background: #1565C0;
+        }
+        
+        .error-message {
+            color: #d32f2f;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .admin-panel {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e1e5e9;
+        }
+        
+        .logout-btn {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            color: #1976D2;
+            border-bottom-color: #1976D2;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .image-upload {
+            margin-bottom: 2rem;
+        }
+        
+        .image-upload input[type="file"] {
+            margin-bottom: 1rem;
+        }
+        
+        .current-image {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: #1976D2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background: #1565C0;
+        }
+        
+        .project-form {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .project-form input, .project-form textarea, .project-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .project-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .project-item {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .project-item h4 {
+            color: #1976D2;
+            margin-bottom: 0.5rem;
+        }
+        
+        .project-actions {
+            margin-top: 1rem;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .back-to-site {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        
+        .back-to-site:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <a href="/isclab.github.io/" class="back-to-site">← 回到網站</a>
+    
+    <div class="login-container" id="loginForm">
+        <div class="logo">管理後台登入</div>
+        <div class="form-group">
+            <label for="username">帳號</label>
+            <input type="text" id="username" placeholder="請輸入帳號">
+        </div>
+        <div class="form-group">
+            <label for="password">密碼</label>
+            <input type="password" id="password" placeholder="請輸入密碼">
+        </div>
+        <button class="login-btn" onclick="login()">登入</button>
+        <div class="error-message" id="errorMessage">帳號或密碼錯誤</div>
+    </div>
+    
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-header">
+            <h2>管理後台</h2>
+            <button class="logout-btn" onclick="logout()">登出</button>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('images')">圖片管理</button>
+            <button class="tab" onclick="showTab('projects')">專案管理</button>
+            <button class="tab" onclick="showTab('content')">內容管理</button>
+        </div>
+        
+        <div class="tab-content active" id="images">
+            <h3>圖片管理</h3>
+            <div class="image-upload">
+                <h4>更換首頁背景圖片</h4>
+                <input type="file" id="heroImage" accept="image/*" onchange="previewImage('heroImage', 'heroPreview')">
+                <img id="heroPreview" class="current-image" src="/isclab.github.io/assets/tech_art_hero_background.png" alt="首頁背景">
+                <br>
+                <button class="btn" onclick="updateHeroImage()">更新背景圖片</button>
+            </div>
+            
+            <div class="image-upload">
+                <h4>更換教授照片</h4>
+                <input type="file" id="professorImage" accept="image/*" onchange="previewImage('professorImage', 'professorPreview')">
+                <img id="professorPreview" class="current-image" src="/isclab.github.io/assets/fac_shiuan-1-BmKg9EEA.png" alt="教授照片">
+                <br>
+                <button class="btn" onclick="updateProfessorImage()">更新教授照片</button>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="projects">
+            <h3>專案管理</h3>
+            <div class="project-form">
+                <h4>新增專案</h4>
+                <input type="text" id="projectTitle" placeholder="專案名稱">
+                <textarea id="projectDescription" placeholder="專案描述" rows="3"></textarea>
+                <select id="projectStatus">
+                    <option value="進行中">進行中</option>
+                    <option value="規劃中">規劃中</option>
+                    <option value="已完成">已完成</option>
+                    <option value="暫停">暫停</option>
+                </select>
+                <input type="text" id="projectTags" placeholder="技術標籤 (用逗號分隔)">
+                <button class="btn" onclick="addProject()">新增專案</button>
+            </div>
+            
+            <div class="project-list" id="projectList">
+                <!-- 專案列表將在這裡動態生成 -->
+            </div>
+        </div>
+        
+        <div class="tab-content" id="content">
+            <h3>內容管理</h3>
+            <p>此功能可以管理網站的各個內容區塊，包括隱藏、顯示、重新排序等操作。</p>
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 5px; margin-top: 1rem;">
+                <strong>注意：</strong> 由於目前使用靜態HTML部署，內容管理功能需要重新部署才能生效。建議使用圖片管理和專案管理功能。
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 登入驗證
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'shiuanlin' && password === 'lin63619') {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadProjects();
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+        
+        // 登出
+        function logout() {
+            document.getElementById('loginForm').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // 切換標籤
+        function showTab(tabName) {
+            // 隱藏所有標籤內容
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 移除所有標籤的active狀態
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // 顯示選中的標籤內容
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // 圖片預覽
+        function previewImage(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // 更新背景圖片
+        function updateHeroImage() {
+            alert('圖片更新功能需要重新部署網站才能生效。\n請聯絡技術人員協助更新。');
+        }
+        
+        // 更新教授照片
+        function updateProfessorImage() {
+            alert('圖片更新功能需要重新部署網站才能生效。\n請聯絡技術人員協助更新。');
+        }
+        
+        // 專案管理
+        let projects = JSON.parse(localStorage.getItem('projects') || '[]');
+        
+        function loadProjects() {
+            const projectList = document.getElementById('projectList');
+            projectList.innerHTML = '';
+            
+            projects.forEach((project, index) => {
+                const projectDiv = document.createElement('div');
+                projectDiv.className = 'project-item';
+                projectDiv.innerHTML = `
+                    <h4>${project.title}</h4>
+                    <p><strong>狀態：</strong>${project.status}</p>
+                    <p><strong>描述：</strong>${project.description}</p>
+                    <p><strong>標籤：</strong>${project.tags}</p>
+                    <div class="project-actions">
+                        <button class="btn" onclick="editProject(${index})">編輯</button>
+                        <button class="btn btn-danger" onclick="deleteProject(${index})">刪除</button>
+                    </div>
+                `;
+                projectList.appendChild(projectDiv);
+            });
+        }
+        
+        function addProject() {
+            const title = document.getElementById('projectTitle').value;
+            const description = document.getElementById('projectDescription').value;
+            const status = document.getElementById('projectStatus').value;
+            const tags = document.getElementById('projectTags').value;
+            
+            if (title && description) {
+                projects.push({
+                    title,
+                    description,
+                    status,
+                    tags,
+                    createdAt: new Date().toISOString()
+                });
+                
+                localStorage.setItem('projects', JSON.stringify(projects));
+                loadProjects();
+                
+                // 清空表單
+                document.getElementById('projectTitle').value = '';
+                document.getElementById('projectDescription').value = '';
+                document.getElementById('projectTags').value = '';
+                
+                alert('專案新增成功！');
+            } else {
+                alert('請填寫專案名稱和描述');
+            }
+        }
+        
+        function deleteProject(index) {
+            if (confirm('確定要刪除這個專案嗎？')) {
+                projects.splice(index, 1);
+                localStorage.setItem('projects', JSON.stringify(projects));
+                loadProjects();
+            }
+        }
+        
+        function editProject(index) {
+            const project = projects[index];
+            const newTitle = prompt('專案名稱：', project.title);
+            const newDescription = prompt('專案描述：', project.description);
+            
+            if (newTitle && newDescription) {
+                projects[index].title = newTitle;
+                projects[index].description = newDescription;
+                localStorage.setItem('projects', JSON.stringify(projects));
+                loadProjects();
+            }
+        }
+        
+        // 初始化一些示例專案
+        if (projects.length === 0) {
+            projects = [
+                {
+                    title: "智慧建築環境感測系統",
+                    description: "開發基於IoT的智慧建築環境監測與控制系統",
+                    status: "進行中",
+                    tags: "IoT, 感測器, 建築自動化",
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    title: "AR輔助建築設計工具",
+                    description: "結合擴增實境技術的建築設計輔助工具開發",
+                    status: "進行中",
+                    tags: "AR, 建築設計, 視覺化",
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            localStorage.setItem('projects', JSON.stringify(projects));
+        }
+    </script>
+</body>
+</html>
+
