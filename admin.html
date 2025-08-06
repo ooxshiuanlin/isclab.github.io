@@ -326,6 +326,7 @@
             <button class="tab active" onclick="showTab('images')">圖片管理</button>
             <button class="tab" onclick="showTab('projects')">專案管理</button>
             <button class="tab" onclick="showTab('content')">內容管理</button>
+            <button class="tab" onclick="showTab('students')">學生管理</button>
         </div>
         
         <div class="tab-content active" id="images">
@@ -399,6 +400,50 @@
                     <li><strong>刪除區塊</strong>：永久移除整個區塊</li>
                     <li><strong>重新排序</strong>：拖拽區塊改變顯示順序</li>
                     <li><strong>新增區塊</strong>：創建新的內容區塊</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="students">
+            <h3>學生管理</h3>
+            <p>管理研究室學生資料，查看學生註冊狀況和個人資料。</p>
+            
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+                <h4>學生註冊統計</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div style="text-align: center; padding: 1rem; background: white; border-radius: 8px;">
+                        <div style="font-size: 2rem; color: #2196F3; font-weight: bold;" id="totalStudents">0</div>
+                        <div style="color: #666;">總學生數</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: white; border-radius: 8px;">
+                        <div style="font-size: 2rem; color: #4CAF50; font-weight: bold;" id="masterStudents">0</div>
+                        <div style="color: #666;">碩士班</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: white; border-radius: 8px;">
+                        <div style="font-size: 2rem; color: #FF9800; font-weight: bold;" id="phdStudents">0</div>
+                        <div style="color: #666;">博士班</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="student-actions" style="margin-bottom: 2rem;">
+                <button class="btn" onclick="refreshStudentData()">重新載入學生資料</button>
+                <button class="btn" onclick="exportStudentData()">匯出學生資料</button>
+                <button class="btn btn-danger" onclick="clearAllStudents()">清除所有學生資料</button>
+            </div>
+            
+            <div class="student-list" id="studentList">
+                <!-- 學生列表將在這裡動態生成 -->
+            </div>
+            
+            <div style="background: #e8f5e8; padding: 1rem; border-radius: 5px; margin-top: 2rem;">
+                <strong>學生管理說明：</strong>
+                <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                    <li><strong>查看資料</strong>：檢視學生的完整個人資料</li>
+                    <li><strong>編輯資料</strong>：協助學生修正個人資料</li>
+                    <li><strong>刪除資料</strong>：移除不再需要的學生資料</li>
+                    <li><strong>匯出資料</strong>：將學生資料匯出為JSON格式</li>
+                    <li><strong>學生入口</strong>：<a href="student-portal.html" target="_blank">學生管理系統</a></li>
                 </ul>
             </div>
         </div>
@@ -732,6 +777,133 @@
             ];
             localStorage.setItem('projects', JSON.stringify(projects));
         }
+        // 學生管理功能
+        function refreshStudentData() {
+            loadStudentList();
+            updateStudentStats();
+        }
+        
+        function loadStudentList() {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const studentList = document.getElementById('studentList');
+            
+            if (students.length === 0) {
+                studentList.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">目前沒有學生註冊資料</p>';
+                return;
+            }
+            
+            studentList.innerHTML = '';
+            students.forEach((student, index) => {
+                const studentDiv = document.createElement('div');
+                studentDiv.className = 'content-block';
+                studentDiv.innerHTML = `
+                    <div class="block-header">
+                        <h4>${student.name} (${student.degree})</h4>
+                        <div class="block-controls">
+                            <button class="btn-small" onclick="viewStudent(${index})">查看</button>
+                            <button class="btn-small btn-warning" onclick="editStudent(${index})">編輯</button>
+                            <button class="btn-small btn-danger" onclick="deleteStudent(${index})">刪除</button>
+                        </div>
+                    </div>
+                    <div style="padding: 0.5rem 0;">
+                        <p><strong>研究領域：</strong>${student.research}</p>
+                        <p><strong>Email：</strong>${student.email}</p>
+                        <p><strong>註冊時間：</strong>${student.registeredAt || '未知'}</p>
+                    </div>
+                `;
+                studentList.appendChild(studentDiv);
+            });
+        }
+        
+        function updateStudentStats() {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const total = students.length;
+            const masters = students.filter(s => s.degree && s.degree.includes('碩士')).length;
+            const phds = students.filter(s => s.degree && s.degree.includes('博士')).length;
+            
+            document.getElementById('totalStudents').textContent = total;
+            document.getElementById('masterStudents').textContent = masters;
+            document.getElementById('phdStudents').textContent = phds;
+        }
+        
+        function viewStudent(index) {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const student = students[index];
+            
+            alert(`學生詳細資料：
+姓名：${student.name}
+學位：${student.degree}
+研究領域：${student.research}
+Email：${student.email}
+入學年份：${student.year || '未填寫'}
+興趣：${student.interests || '未填寫'}
+註冊時間：${student.registeredAt || '未知'}`);
+        }
+        
+        function editStudent(index) {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const student = students[index];
+            
+            const newName = prompt('修改姓名：', student.name);
+            if (newName === null) return;
+            
+            const newDegree = prompt('修改學位：', student.degree);
+            if (newDegree === null) return;
+            
+            const newResearch = prompt('修改研究領域：', student.research);
+            if (newResearch === null) return;
+            
+            const newEmail = prompt('修改Email：', student.email);
+            if (newEmail === null) return;
+            
+            students[index] = {
+                ...student,
+                name: newName,
+                degree: newDegree,
+                research: newResearch,
+                email: newEmail
+            };
+            
+            localStorage.setItem('students', JSON.stringify(students));
+            refreshStudentData();
+            alert('學生資料已更新！');
+        }
+        
+        function deleteStudent(index) {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const student = students[index];
+            
+            if (confirm(`確定要刪除 ${student.name} 的資料嗎？此操作無法復原。`)) {
+                students.splice(index, 1);
+                localStorage.setItem('students', JSON.stringify(students));
+                refreshStudentData();
+                alert('學生資料已刪除！');
+            }
+        }
+        
+        function exportStudentData() {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const dataStr = JSON.stringify(students, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = 'students_data.json';
+            link.click();
+        }
+        
+        function clearAllStudents() {
+            if (confirm('確定要清除所有學生資料嗎？此操作無法復原。')) {
+                localStorage.removeItem('students');
+                refreshStudentData();
+                alert('所有學生資料已清除！');
+            }
+        }
+        
+        // 頁面載入時載入學生資料
+        window.addEventListener('load', function() {
+            refreshStudentData();
+        });
     </script>
 </body>
 </html>

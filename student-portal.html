@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生資料管理系統 | 互動空間運算研究室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem;
+        }
+        
+        .header {
+            background: #2196F3;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: #f5f5f5;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+        
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #1976D2;
+        }
+        
+        .btn-secondary {
+            background: #666;
+            margin-left: 1rem;
+        }
+        
+        .btn-secondary:hover {
+            background: #555;
+        }
+        
+        .student-preview {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .photo-upload {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ddd;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .photo-upload:hover {
+            border-color: #2196F3;
+            background: #f8f9fa;
+        }
+        
+        .photo-upload img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+        
+        .success-message {
+            background: #4CAF50;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← 返回網站</a>
+    
+    <div class="container">
+        <div class="header">
+            <h1>學生資料管理系統</h1>
+            <p>互動空間運算研究室</p>
+        </div>
+        
+        <div class="content">
+            <div class="success-message" id="successMessage">
+                資料已成功儲存！
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                請填寫所有必填欄位
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="switchTab('login')">登入</button>
+                <button class="tab-button" onclick="switchTab('register')">註冊</button>
+                <button class="tab-button" onclick="switchTab('manage')">管理資料</button>
+            </div>
+            
+            <!-- 登入頁面 -->
+            <div id="login" class="tab-content active">
+                <h3>學生登入</h3>
+                <form onsubmit="studentLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">密碼</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn">登入</button>
+                </form>
+            </div>
+            
+            <!-- 註冊頁面 -->
+            <div id="register" class="tab-content">
+                <h3>學生註冊</h3>
+                <form onsubmit="studentRegister(event)">
+                    <div class="form-group">
+                        <label for="regName">姓名 *</label>
+                        <input type="text" id="regName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">Email *</label>
+                        <input type="email" id="regEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword">密碼 *</label>
+                        <input type="password" id="regPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regDegree">學位 *</label>
+                        <select id="regDegree" required>
+                            <option value="">請選擇</option>
+                            <option value="碩士班">碩士班</option>
+                            <option value="博士班">博士班</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">註冊</button>
+                </form>
+            </div>
+            
+            <!-- 管理資料頁面 -->
+            <div id="manage" class="tab-content">
+                <h3>管理個人資料</h3>
+                <div id="loginRequired" style="text-align: center; padding: 2rem; color: #666;">
+                    請先登入以管理您的個人資料
+                </div>
+                
+                <div id="manageForm" style="display: none;">
+                    <form onsubmit="updateProfile(event)">
+                        <div class="form-group">
+                            <label>個人照片</label>
+                            <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
+                                <span id="photoPlaceholder" style="font-size: 3rem; color: #999;">📷</span>
+                                <img id="photoPreview" style="display: none;">
+                            </div>
+                            <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="previewPhoto(event)">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="manageName">姓名 *</label>
+                            <input type="text" id="manageName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="manageDegree">學位 *</label>
+                            <select id="manageDegree" required>
+                                <option value="碩士班">碩士班</option>
+                                <option value="博士班">博士班</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="manageResearch">研究領域 *</label>
+                            <textarea id="manageResearch" rows="3" placeholder="請描述您的研究興趣和專長領域" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="manageEmail">Email *</label>
+                            <input type="email" id="manageEmail" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="managePhone">電話</label>
+                            <input type="tel" id="managePhone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="manageLinkedIn">LinkedIn</label>
+                            <input type="url" id="manageLinkedIn" placeholder="https://linkedin.com/in/yourprofile">
+                        </div>
+                        
+                        <button type="submit" class="btn">更新資料</button>
+                        <button type="button" class="btn btn-secondary" onclick="logout()">登出</button>
+                    </form>
+                    
+                    <div class="student-preview">
+                        <h4>預覽效果</h4>
+                        <div id="previewCard">
+                            <!-- 預覽卡片將在這裡顯示 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = null;
+        
+        // 檢查是否已登入
+        function checkLogin() {
+            const user = localStorage.getItem('currentStudent');
+            if (user) {
+                currentUser = JSON.parse(user);
+                showManageForm();
+                loadUserData();
+            }
+        }
+        
+        // 切換標籤
+        function switchTab(tabName) {
+            // 隱藏所有標籤內容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有按鈕的active類
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 顯示選中的標籤
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // 學生登入
+        function studentLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // 從localStorage獲取學生資料
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const student = students.find(s => s.email === email && s.password === password);
+            
+            if (student) {
+                currentUser = student;
+                localStorage.setItem('currentStudent', JSON.stringify(student));
+                showMessage('登入成功！', 'success');
+                switchTab('manage');
+                showManageForm();
+                loadUserData();
+            } else {
+                showMessage('Email或密碼錯誤', 'error');
+            }
+        }
+        
+        // 學生註冊
+        function studentRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const degree = document.getElementById('regDegree').value;
+            
+            // 檢查Email是否已存在
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            if (students.find(s => s.email === email)) {
+                showMessage('此Email已被註冊', 'error');
+                return;
+            }
+            
+            // 創建新學生資料
+            const newStudent = {
+                id: Date.now(),
+                name,
+                email,
+                password,
+                degree,
+                research: '',
+                phone: '',
+                linkedin: '',
+                photo: null,
+                createdAt: new Date().toISOString()
+            };
+            
+            students.push(newStudent);
+            localStorage.setItem('students', JSON.stringify(students));
+            
+            currentUser = newStudent;
+            localStorage.setItem('currentStudent', JSON.stringify(newStudent));
+            
+            showMessage('註冊成功！請完善您的個人資料', 'success');
+            switchTab('manage');
+            showManageForm();
+            loadUserData();
+        }
+        
+        // 更新個人資料
+        function updateProfile(event) {
+            event.preventDefault();
+            
+            if (!currentUser) return;
+            
+            const name = document.getElementById('manageName').value;
+            const degree = document.getElementById('manageDegree').value;
+            const research = document.getElementById('manageResearch').value;
+            const email = document.getElementById('manageEmail').value;
+            const phone = document.getElementById('managePhone').value;
+            const linkedin = document.getElementById('manageLinkedIn').value;
+            
+            // 更新用戶資料
+            currentUser.name = name;
+            currentUser.degree = degree;
+            currentUser.research = research;
+            currentUser.email = email;
+            currentUser.phone = phone;
+            currentUser.linkedin = linkedin;
+            
+            // 更新localStorage中的資料
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const index = students.findIndex(s => s.id === currentUser.id);
+            if (index !== -1) {
+                students[index] = currentUser;
+                localStorage.setItem('students', JSON.stringify(students));
+                localStorage.setItem('currentStudent', JSON.stringify(currentUser));
+            }
+            
+            showMessage('資料更新成功！', 'success');
+            updatePreview();
+            
+            // 更新主網站的學生資料
+            updateMainWebsite();
+        }
+        
+        // 照片預覽
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoPreview = document.getElementById('photoPreview');
+                    const photoPlaceholder = document.getElementById('photoPlaceholder');
+                    
+                    photoPreview.src = e.target.result;
+                    photoPreview.style.display = 'block';
+                    photoPlaceholder.style.display = 'none';
+                    
+                    // 儲存照片到用戶資料
+                    if (currentUser) {
+                        currentUser.photo = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 顯示管理表單
+        function showManageForm() {
+            document.getElementById('loginRequired').style.display = 'none';
+            document.getElementById('manageForm').style.display = 'block';
+        }
+        
+        // 載入用戶資料
+        function loadUserData() {
+            if (!currentUser) return;
+            
+            document.getElementById('manageName').value = currentUser.name || '';
+            document.getElementById('manageDegree').value = currentUser.degree || '';
+            document.getElementById('manageResearch').value = currentUser.research || '';
+            document.getElementById('manageEmail').value = currentUser.email || '';
+            document.getElementById('managePhone').value = currentUser.phone || '';
+            document.getElementById('manageLinkedIn').value = currentUser.linkedin || '';
+            
+            if (currentUser.photo) {
+                const photoPreview = document.getElementById('photoPreview');
+                const photoPlaceholder = document.getElementById('photoPlaceholder');
+                
+                photoPreview.src = currentUser.photo;
+                photoPreview.style.display = 'block';
+                photoPlaceholder.style.display = 'none';
+            }
+            
+            updatePreview();
+        }
+        
+        // 更新預覽
+        function updatePreview() {
+            if (!currentUser) return;
+            
+            const previewCard = document.getElementById('previewCard');
+            previewCard.innerHTML = `
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 300px; margin: 0 auto;">
+                    <div style="width: 120px; height: 120px; border-radius: 50%; background: #f0f0f0; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        ${currentUser.photo ? 
+                            `<img src="${currentUser.photo}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                            '<span style="font-size: 3rem; color: #999;">👤</span>'
+                        }
+                    </div>
+                    <h4 style="color: #2196F3; margin-bottom: 0.5rem;">${currentUser.name || '姓名'}</h4>
+                    <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">${currentUser.degree || '學位'}</p>
+                    <div style="text-align: left; font-size: 0.9rem;">
+                        <p style="margin-bottom: 0.5rem;"><strong>研究領域：</strong></p>
+                        <p style="color: #666; margin-bottom: 1rem;">${currentUser.research || '研究興趣和專長'}</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>Email：</strong></p>
+                        <p style="color: #666;">${currentUser.email || 'email@example.com'}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 登出
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentStudent');
+            document.getElementById('loginRequired').style.display = 'block';
+            document.getElementById('manageForm').style.display = 'none';
+            switchTab('login');
+            showMessage('已成功登出', 'success');
+        }
+        
+        // 顯示訊息
+        function showMessage(message, type) {
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (type === 'success') {
+                successMsg.textContent = message;
+                successMsg.style.display = 'block';
+                errorMsg.style.display = 'none';
+            } else {
+                errorMsg.textContent = message;
+                errorMsg.style.display = 'block';
+                successMsg.style.display = 'none';
+            }
+            
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+                errorMsg.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 更新主網站的學生資料
+        function updateMainWebsite() {
+            // 這個函數會將學生資料同步到主網站
+            // 實際實作時可以通過API或其他方式同步
+            console.log('學生資料已更新，準備同步到主網站');
+        }
+        
+        // 頁面載入時檢查登入狀態
+        window.onload = function() {
+            checkLogin();
+        };
+    </script>
+</body>
+</html>
+

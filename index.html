@@ -342,6 +342,49 @@
                     開發創新的互動空間運算技術，推動建築設計的數位化轉型。
                 </p>
             </div>
+            
+            <!-- 學生成員區塊 -->
+            <div style="margin-top: 4rem;">
+                <h3 style="color: #2196F3; text-align: center; margin-bottom: 2rem; font-size: 1.8rem;">研究生團隊</h3>
+                
+                <div id="students-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <!-- 示範學生資料卡片 -->
+                    <div class="student-card" style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
+                        <div style="width: 120px; height: 120px; border-radius: 50%; background: #f0f0f0; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; color: #999;">
+                            <span style="font-size: 3rem;">👤</span>
+                        </div>
+                        <h4 style="color: #2196F3; margin-bottom: 0.5rem;">學生姓名</h4>
+                        <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">碩士班 / 博士班</p>
+                        <div style="text-align: left; font-size: 0.9rem;">
+                            <p style="margin-bottom: 0.5rem;"><strong>研究領域：</strong></p>
+                            <p style="color: #666; margin-bottom: 1rem;">研究興趣和專長</p>
+                            <p style="margin-bottom: 0.5rem;"><strong>Email：</strong></p>
+                            <p style="color: #666;">student@example.com</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 新增學生按鈕 -->
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px dashed #ddd;">
+                        <div style="width: 120px; height: 120px; border-radius: 50%; background: #f8f9fa; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; color: #999; border: 2px dashed #ddd;">
+                            <span style="font-size: 3rem;">+</span>
+                        </div>
+                        <h4 style="color: #666; margin-bottom: 0.5rem;">新增學生資料</h4>
+                        <p style="color: #999; font-size: 0.9rem; margin-bottom: 1rem;">學生可以自己註冊並管理個人資料</p>
+                        <button onclick="openStudentLogin()" style="background: #2196F3; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                            學生登入/註冊
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 10px;">
+                    <p style="color: #666; margin-bottom: 0.5rem;">
+                        <strong>給研究生：</strong>您可以點擊上方按鈕登入系統，建立和更新您的個人資料
+                    </p>
+                    <p style="color: #999; font-size: 0.9rem;">
+                        包括個人照片、研究領域、聯絡方式等資訊
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -368,6 +411,70 @@
                     });
                 }
             });
+        });
+
+        // 學生登入功能
+        function openStudentLogin() {
+            window.open('student-portal.html', '_blank');
+        }
+
+        // 載入學生資料
+        function loadStudents() {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const container = document.getElementById('students-container');
+            
+            // 清除現有的學生卡片（保留示範卡片和新增按鈕）
+            const existingCards = container.querySelectorAll('.student-card:not(.demo-card)');
+            existingCards.forEach(card => card.remove());
+            
+            // 添加真實學生資料
+            students.forEach(student => {
+                if (student.name && student.research) {
+                    const studentCard = createStudentCard(student);
+                    container.insertBefore(studentCard, container.lastElementChild);
+                }
+            });
+        }
+
+        // 創建學生卡片
+        function createStudentCard(student) {
+            const card = document.createElement('div');
+            card.className = 'student-card';
+            card.style.cssText = 'background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;';
+            
+            card.innerHTML = `
+                <div style="width: 120px; height: 120px; border-radius: 50%; background: #f0f0f0; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    ${student.photo ? 
+                        `<img src="${student.photo}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                        '<span style="font-size: 3rem; color: #999;">👤</span>'
+                    }
+                </div>
+                <h4 style="color: #2196F3; margin-bottom: 0.5rem;">${student.name}</h4>
+                <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">${student.degree}</p>
+                <div style="text-align: left; font-size: 0.9rem;">
+                    <p style="margin-bottom: 0.5rem;"><strong>研究領域：</strong></p>
+                    <p style="color: #666; margin-bottom: 1rem;">${student.research}</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Email：</strong></p>
+                    <p style="color: #666;">${student.email}</p>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // 頁面載入時載入學生資料
+        window.addEventListener('load', function() {
+            loadStudents();
+            
+            // 每5秒檢查一次學生資料更新
+            setInterval(loadStudents, 5000);
+        });
+
+        // 監聽storage事件以即時更新
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'students') {
+                loadStudents();
+            }
         });
     </script>
 </body>
